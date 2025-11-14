@@ -69,15 +69,45 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+	pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+where
+    T: PartialOrd + Clone,
+{
+    let mut merged_list = LinkedList::new();
+    let mut current_a = list_a.start;
+    let mut current_b = list_b.start;
+
+    while current_a.is_some() || current_b.is_some() {
+        match (current_a, current_b) {
+            (Some(ptr_a), Some(ptr_b)) => {
+                // Safe because we know the pointers are valid
+                let node_a = unsafe { &*ptr_a.as_ptr() };
+                let node_b = unsafe { &*ptr_b.as_ptr() };
+                
+                if node_a.val <= node_b.val {
+                    merged_list.add(node_a.val.clone());
+                    current_a = node_a.next;
+                } else {
+                    merged_list.add(node_b.val.clone());
+                    current_b = node_b.next;
+                }
+            }
+            (Some(ptr_a), None) => {
+                let node_a = unsafe { &*ptr_a.as_ptr() };
+                merged_list.add(node_a.val.clone());
+                current_a = node_a.next;
+            }
+            (None, Some(ptr_b)) => {
+                let node_b = unsafe { &*ptr_b.as_ptr() };
+                merged_list.add(node_b.val.clone());
+                current_b = node_b.next;
+            }
+            (None, None) => break,
         }
-	}
+    }
+
+    merged_list
+}
 }
 
 impl<T> Display for LinkedList<T>
